@@ -1,14 +1,5 @@
 # PROJETO: NEW IDEIAS
 
-# DESCRIÇÃO
-A plataforma New Ideias é um sistema colaborativo voltado para compartilhamento de ideias,
-interação entre usuários e conexão com investidores. O sistema será desenvolvido como um
-ambiente semelhante a um fórum, com foco em projetos open-source, validação de ideias
-e formação de equipes.
-
-O objetivo principal é criar uma base sólida, segura e escalável, permitindo evolução futura
-com novas funcionalidades.
-
 # PLANEJAMENTO E ARQUITETURA DO SISTEMA
 
 A arquitetura será baseada no modelo cliente-servidor, com separação clara de responsabilidades
