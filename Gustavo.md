@@ -1,235 +1,184 @@
-# PROJETO: NEW IDEIAS (SELL IDEAS)
+# PROJETO: NEW IDEIAS
 
 # DESCRIÇÃO
-A plataforma New Ideias é um sistema colaborativo onde usuários podem
-compartilhar ideias, interagir com a comunidade e atrair investidores.
-Funciona como um fórum com foco em projetos open-source e negociação.
+A plataforma New Ideias é um sistema colaborativo voltado para compartilhamento de ideias,
+interação entre usuários e conexão com investidores. O sistema será desenvolvido como um
+ambiente semelhante a um fórum, com foco em projetos open-source, validação de ideias
+e formação de equipes.
 
-# ARQUITETURA DO SISTEMA
+O objetivo principal é criar uma base sólida, segura e escalável, permitindo evolução futura
+com novas funcionalidades.
 
-Frontend → API (Node.js) → Backend → Banco de Dados (SQL)
+# PLANEJAMENTO E ARQUITETURA DO SISTEMA
 
-# Tecnologias:
-- Frontend: HTML5, CSS3, JavaScript / React
-- Backend: Node.js
-- Banco de Dados: PostgreSQL / MySQL
+A arquitetura será baseada no modelo cliente-servidor, com separação clara de responsabilidades
+entre frontend, backend e banco de dados.
 
-# 1. CONEXÃO COM BANCO DE DADOS
+Fluxo do sistema:
 
-Arquivo: backend/config/database.js
+Usuário → Frontend → API → Backend → Banco de Dados
 
-Código:
+Estrutura:
 
-const { Pool } = require('pg');
+Frontend:
+Responsável pela interface e experiência do usuário, incluindo telas de login,
+cadastro, feed de ideias e perfil.
 
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: 5432,
-});
+Backend:
+Responsável pelas regras de negócio, autenticação, controle de acesso e processamento
+das requisições.
 
-module.exports = pool;
+Banco de Dados:
+Responsável pela persistência das informações, garantindo integridade e relacionamento
+entre os dados.
 
-# Boas práticas:
-- Utilizar variáveis de ambiente (.env)
-- Validar conexão ao iniciar servidor
-- Separar configuração por ambiente (dev/prod)
+Organização do projeto:
 
+/project
+  /frontend
+  /backend
+    /config
+    /routes
+    /controllers
+    /models
 
-# 2. ESTRUTURA DO BANCO DE DADOS
+Diretrizes:
+- Separação de responsabilidades (arquitetura MVC)
+- Padronização de rotas e respostas da API
+- Uso de variáveis de ambiente para segurança
+- Estrutura preparada para escalabilidade
 
-# Tabela: usuarios
-CREATE TABLE usuarios (
-  id SERIAL PRIMARY KEY,
-  nome VARCHAR(100),
-  email VARCHAR(100) UNIQUE,
-  senha TEXT,
-  tipo_usuario VARCHAR(20),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+# MODELAGEM DO BANCO DE DADOS
 
-# Tabela: ideias
-CREATE TABLE ideias (
-  id SERIAL PRIMARY KEY,
-  titulo VARCHAR(255),
-  descricao TEXT,
-  categoria VARCHAR(100),
-  user_id INT REFERENCES usuarios(id),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+A modelagem do banco será realizada com foco em organização, integridade e suporte
+às funcionalidades principais da aplicação.
 
-# Tabela: transacoes
-CREATE TABLE transacoes (
-  id SERIAL PRIMARY KEY,
-  ideia_id INT,
-  investidor_id INT,
-  valor NUMERIC,
-  data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+Entidades principais:
 
-# 3. CRUD DE IDEIAS (BACKEND)
+Usuários:
+Armazena dados dos usuários da plataforma, incluindo identificação e tipo de perfil
+(investidor ou criador de ideias).
 
-# Rotas:
-POST    /ideias        → Criar ideia
-GET     /ideias        → Listar ideias
-GET     /ideias/:id    → Buscar ideia
-PUT     /ideias/:id    → Atualizar ideia
-DELETE  /ideias/:id    → Deletar ideia
+Ideias:
+Representa as ideias publicadas na plataforma, contendo título, descrição,
+categoria e vínculo com o usuário criador.
 
-# Implementação:
+Transações:
+Registra interações financeiras ou negociações relacionadas às ideias,
+garantindo rastreabilidade e transparência.
 
-## Criar Ideia
-app.post('/ideias', authMiddleware, async (req, res) => {
-  const { titulo, descricao, categoria } = req.body;
-  const userId = req.user.id;
+Relacionamentos:
+- Um usuário pode criar várias ideias
+- Uma ideia pode possuir múltiplas transações
+- Transações estão associadas a ideias e usuários
 
-  const result = await pool.query(
-    'INSERT INTO ideias (titulo, descricao, categoria, user_id) VALUES ($1, $2, $3, $4) RETURNING *',
-    [titulo, descricao, categoria, userId]
-  );
+Boas práticas adotadas:
+- Uso de chaves primárias e estrangeiras
+- Normalização do banco de dados
+- Estrutura preparada para otimização futura (índices)
 
-  res.json(result.rows[0]);
-});
+# FUNCIONALIDADES PRINCIPAIS DO SISTEMA
 
-## Listar Ideias
-app.get('/ideias', async (req, res) => {
-  const result = await pool.query('SELECT * FROM ideias');
-  res.json(result.rows);
-});
+CRUD de Ideias:
+Será o núcleo do sistema, permitindo que usuários criem, visualizem,
+editem e removam ideias. Essa funcionalidade será protegida por autenticação
+e seguirá regras de autorização baseadas no usuário criador.
 
-## Atualizar Ideia
-app.put('/ideias/:id', authMiddleware, async (req, res) => {
-  const { id } = req.params;
-  const { titulo, descricao } = req.body;
+Regras de negócio:
+- Apenas o autor pode editar ou excluir sua ideia
+- Validação de dados obrigatórios
+- Garantia de consistência das informações
 
-  await pool.query(
-    'UPDATE ideias SET titulo=$1, descricao=$2 WHERE id=$3',
-    [titulo, descricao, id]
-  );
+Autenticação e Login:
+O sistema contará com autenticação baseada em token, garantindo segurança
+no acesso às funcionalidades protegidas.
 
-  res.send("Atualizado");
-});
+Fluxo de autenticação:
+- Usuário envia credenciais
+- Sistema valida os dados
+- Token de acesso é gerado
+- Token é utilizado nas requisições subsequentes
 
-## Deletar Ideia
-app.delete('/ideias/:id', authMiddleware, async (req, res) => {
-  const { id } = req.params;
+Integração com Frontend:
+O frontend será responsável por consumir a API, enviar dados e armazenar
+informações de autenticação para manter a sessão do usuário ativa.
 
-  await pool.query('DELETE FROM ideias WHERE id=$1', [id]);
+Sistema de Busca:
+Será implementado para permitir que investidores encontrem ideias com facilidade,
+utilizando filtros por texto, categorias ou palavras-chave.
 
-  res.send("Deletado");
-});
+Objetivo:
+- Melhorar a navegação
+- Facilitar descoberta de ideias relevantes
+- Otimizar experiência do usuário
 
-# Regras de negócio:
-- Apenas o criador pode editar/deletar
-- Validar dados antes de salvar
-- Sanitizar inputs
+Histórico de Transações:
+Responsável por registrar interações financeiras dentro da plataforma,
+garantindo transparência e confiabilidade para investidores e criadores.
 
+# DESIGN E EXPERIÊNCIA DO USUÁRIO
 
-# 4. LOGIN E AUTENTICAÇÃO
+Antes da implementação do frontend, serão desenvolvidos wireframes
+para definir a estrutura visual e fluxo das telas principais.
 
-# Fluxo:
-1. Usuário envia email e senha
-2. Backend valida credenciais
-3. Geração de token JWT
-4. Frontend armazena token
-5. Token enviado nas requisições protegidas
+Telas planejadas:
 
-# Código de Login:
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+Tela de Login:
+Entrada do sistema com autenticação do usuário.
 
-app.post('/login', async (req, res) => {
-  const { email, senha } = req.body;
+Tela de Cadastro:
+Registro de novos usuários com definição de perfil.
 
-  const user = await pool.query(
-    'SELECT * FROM usuarios WHERE email=$1',
-    [email]
-  );
+Tela de Feed de Ideias:
+Listagem das ideias disponíveis na plataforma.
 
-  if (user.rows.length === 0) {
-    return res.status(401).send("Usuario nao encontrado");
-  }
+Tela de Detalhes da Ideia:
+Visualização completa de uma ideia específica.
 
-  const validPassword = await bcrypt.compare(senha, user.rows[0].senha);
+Tela de Perfil:
+Informações do usuário e histórico de atividades.
 
-  if (!validPassword) {
-    return res.status(401).send("Senha invalida");
-  }
+Diretrizes de interface:
+- Interface simples e intuitiva
+- Foco na experiência do usuário (UX)
+- Layout responsivo para diferentes dispositivos
 
-  const token = jwt.sign(
-    { id: user.rows[0].id },
-    process.env.JWT_SECRET,
-    { expiresIn: '1d' }
-  );
+# CONSIDERAÇÕES SOBRE DESENVOLVIMENTO
 
-  res.json({ token });
-});
+O desenvolvimento será guiado por prioridades definidas em sprint,
+com foco inicial na estrutura do sistema e banco de dados.
 
-# Middleware de Autenticação:
-function authMiddleware(req, res, next) {
-  const token = req.headers.authorization;
+Ordem de prioridade:
+1. Definição da arquitetura
+2. Modelagem do banco de dados
+3. Implementação das funcionalidades principais
+4. Integração frontend e backend
+5. Refinamento e melhorias
 
-  if (!token) return res.status(401).send("Sem token");
+Pontos críticos:
+- Estabilidade da conexão com banco de dados
+- Segurança na autenticação
+- Consistência nas regras de negócio
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch {
-    res.status(401).send("Token invalido");
-  }
-}
-
-# 5. INTEGRAÇÃO COM FRONTEND
-
-
-fetch('/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email, senha })
-})
-.then(res => res.json())
-.then(data => {
-  localStorage.setItem('token', data.token);
-});
-
-# 🔎 6. SISTEMA DE BUSCA
-
-app.get('/ideias/busca', async (req, res) => {
-  const { termo } = req.query;
-
-  const result = await pool.query(
-    "SELECT * FROM ideias WHERE titulo LIKE $1 OR descricao LIKE $1",
-    [`%${termo}%`]
-  );
-
-  res.json(result.rows);
-});
-
-# 7. HISTÓRICO DE TRANSAÇÕES
-
-app.post('/transacoes', async (req, res) => {
-  const { ideia_id, investidor_id, valor } = req.body;
-
-  await pool.query(
-    'INSERT INTO transacoes (ideia_id, investidor_id, valor) VALUES ($1, $2, $3)',
-    [ideia_id, investidor_id, valor]
-  );
-
-  res.send("Transacao registrada");
-});
-
-# CONSIDERAÇÕES FINAIS
-
-- Banco de dados é a base do sistema
-- CRUD de ideias é a funcionalidade central
-- Autenticação garante segurança
-- Sistema de busca melhora a experiência do usuário
-
-# 👨‍💻 EQUIPE
+# EQUIPE
 
 PO: Alexandre Bonissoni  
 Backend / Scrum Master: Adilson  
 Frontend: Gustavo Lacerda  
+
+# OBJETIVO FINAL
+
+Entregar uma plataforma funcional com base sólida, permitindo:
+- Cadastro e autenticação de usuários
+- Publicação e gerenciamento de ideias
+- Interação entre usuários e investidores
+- Estrutura preparada para evolução futura
+
+# STATUS DO PROJETO
+
+- Arquitetura definida
+- Banco de dados modelado
+- Wireframes planejados
+- Funcionalidades em desenvolvimento
+
+# FIM DA DOCUMENTAÇÃO
