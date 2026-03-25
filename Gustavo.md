@@ -264,7 +264,3 @@ app.post('/transacoes', async (req, res) => {
 - CRUD e funcionalidade principal
 - Autenticacao garante seguranca
 - Busca melhora experiencia do usuario
-
-====================================================
-FIM DO ARQUIVO
-====================================================
