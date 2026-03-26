@@ -18,7 +18,7 @@ Foco: backend, regras de negócio e segurança.
 atualização e exclusão das ideias no banco, uma funcionalidade que requer atenção redobrada.
 
 - Conectar Banco de Dados: para garantir que o alinhamento dos dados esteja estável para as outras funções,
-é necessario que esta função esteja sempre em prioridade e requer atenção redobrada
+é necessario que esta função esteja sempre em prioridade e requer atenção como a imolementação do CRUD de ideias
 
 - Implementar histórico de transações: tarefa crítica para passar confiança aos empresario que esta buscando novas ideias 
   naa movimentação na plataforma.
